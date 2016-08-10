@@ -9,8 +9,16 @@
 		<meta http-equiv="pragma" content="no-cache" />
 	</head>
 	<body>
+		<div id="game_title">
+			Potato Escape
+		</div>
+		<div id="level_count">
+		</div>
+		<div id="death_count">
+		</div>
 		<canvas width = "616" height = "556" id = "mazecanvas">Game failed to load. Your browswer does not support HTML5.
 		</canvas>
+
 		
 		<noscript>
 			Javascript is not enabled. Please enable it to play the game.

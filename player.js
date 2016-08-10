@@ -1,4 +1,4 @@
-function Player(direction, x, y, width, height)
+function Player(direction, x, y, width, height, speed)
 {
 	//Game character variables.
 	this.charPosX = x;
@@ -6,13 +6,14 @@ function Player(direction, x, y, width, height)
 	this.width = width;
 	this.height = height;
 	this.direction = direction;
+	this.speed = speed;
 
 	this.moveNorth = function()
 	{
 		if(this.direction != 2)
 		{
 			this.direction = 0;
-			this.charPosY--;
+			this.charPosY-= this.speed;
 		}
 	}
 
@@ -21,7 +22,7 @@ function Player(direction, x, y, width, height)
 		if(this.direction != 3)
 		{
 			this.direction = 1;
-			this.charPosX++;
+			this.charPosX+= this.speed;
 		}
 	}
 
@@ -30,7 +31,7 @@ function Player(direction, x, y, width, height)
 		if(this.direction != 0)
 		{
 			this.direction = 2;
-			this.charPosY++;
+			this.charPosY+= this.speed;
 		}
 	}
 
@@ -39,7 +40,7 @@ function Player(direction, x, y, width, height)
 		if(this.direction != 1)
 		{
 			this.direction = 3;
-			this.charPosX--;
+			this.charPosX-= this.speed;
 		}
 	}
 
@@ -91,6 +92,11 @@ function Player(direction, x, y, width, height)
 		return this.direction;
 	}
 
+	this.getSpeed = function()
+	{
+		return this.speed;
+	}
+
 	this.setX = function(x)
 	{
 		this.charPosX = x;
@@ -104,5 +110,10 @@ function Player(direction, x, y, width, height)
 	this.setDirection = function(dir)
 	{
 		this.direction = dir;
+	}
+
+	this.setSpeed = function(speed)
+	{
+		this.speed = speed;
 	}
 }

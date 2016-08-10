@@ -4,7 +4,7 @@ $(document).ready(function()
 	var canvas;
 	var context;
 	var img;
-
+	var loaded = false;
 	//Maze information variables.
 	var mazeHeight;
 	var mazeWidth;
@@ -14,25 +14,25 @@ $(document).ready(function()
 	var player;
 	var playerStartX = 5;
 	var playerStartY = 3;
+	var playerWidth = 5;
+	var playerHeight = 5;
+	var playerSpeed = 1;
+	var playerStartDir = 2; //south
+	
+
 	//Game state variables
-	var frames;
-	var loaded = false;
-	var requestID;
+	var levelCount = 1;
+	var deathCount = 0;
+	var speedCap = 5;
+	var firstRound = true;
 	function main()
 	{
-		player = new Player(2, playerStartX, playerStartY, 5, 5);
+		player = new Player(playerStartDir, playerStartX, playerStartY, playerWidth, playerHeight, playerSpeed);
 		drawMazeAndCharacter(playerStartX, playerStartY);
-
-		frames = 0;
+		$("#level_count").text("Level: " + levelCount);
+		$("#death_count").text("Death count: " + deathCount);
 		window.addEventListener("keydown", moveCharacter, true);
-
-		init();
 		loop();
-	}
-
-	function init()
-	{
-		/*TODO: Initialize game state information*/
 	}
 
 	function loop()
@@ -40,13 +40,13 @@ $(document).ready(function()
 		update();
 		if(!victory)
 		{
-			requestID = requestAnimationFrame(loop, canvas);
+			requestAnimationFrame(loop, canvas);
 		}
 	}
 
 	function update()
 	{
-		frames++;
+		console.log(playerSpeed);
 		if(loaded)
 		{
 			//alert(mazeWidth);
@@ -124,9 +124,8 @@ $(document).ready(function()
 		{
 			player.stop();
 			respawn();
-		}
-	
-}
+		}	
+	}
 	function moveCharacter(e) 
 	{
 		restoreBackground(player.getX(), player.getY());
@@ -170,6 +169,13 @@ $(document).ready(function()
 		player.setX(5);
 		player.setY(5);
 		player.setDirection(2);
+		deathCount++;
+		if(playerSpeed > 1)
+		{
+			playerSpeed--;
+			player.setSpeed(playerSpeed);
+		}
+		$("#death_count").text("Death count: " + deathCount);
 		drawCharacter(player.getX(), player.getY(), "#0000FF");
 	}
 
@@ -181,11 +187,12 @@ $(document).ready(function()
 		var finish = false;
 		for(var i = 0; i < 4 * width * height; i +=4)
 		{
+			//console.log(data[i] + ", " + data[i + 1] + ", " + data[i+ 2]);
 			if(data[i] === 0 && data[i+1] === 153 && data[i+2] === 0)
 			{
 				return true;
 			}
-			else if((data[i] === 0 && data[i + 1] === 0 && data[i + 2] === 0)
+			else if((firstRound && data[i] === 0 && data[i + 1] === 0 && data[i + 2] === 0)
 				|| (data[i] === 255 && data[i + 1] === 255 && data[i + 2] === 255))
 			{
 				finish = true;
@@ -204,7 +211,10 @@ $(document).ready(function()
 
 	function victoryScreen()
 	{
+		firstRound = false;
 		clearScreen(0, 0, canvas.width, canvas.height);
+		levelCount++;
+		$("#level_count").text("Level: " + levelCount);
 		context.font = "40px Arial";
 		context.fillStyle = "black";
 		context.textAlign = "center";
@@ -220,6 +230,10 @@ $(document).ready(function()
 				clearScreen(0, 0, canvas.width, canvas.height);
 				victory = false;
 				loaded = false;
+				if(playerSpeed < speedCap)
+				{
+					playerSpeed++;
+				}
 				main();
 			}
 		});

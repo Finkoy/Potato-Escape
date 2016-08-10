@@ -157,7 +157,7 @@ PNG* SquareMaze::drawMaze() const
 	PNG * picture = new PNG(picWidth, picHeight);
 	colorMaze(picture);
 
-	for(int x = 20; x < picWidth; x++)
+	for(int x = 0; x < picWidth; x++)
 	{
 		(*picture)(x,0)->red = 0;
 		(*picture)(x,0)->blue = 0;

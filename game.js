@@ -9,6 +9,8 @@ $(document).ready(function()
 	var mazeHeight;
 	var mazeWidth;
 	var victory = false;
+	var offsetX = 0;
+	var offsetY = 0;
 
 	//player
 	var player;
@@ -16,7 +18,7 @@ $(document).ready(function()
 	var playerStartY = 3;
 	var playerWidth = 5;
 	var playerHeight = 5;
-	var playerSpeed = 1;
+	var playerSpeed = 0.5;
 	var playerStartDir = 2; //south
 	
 
@@ -46,10 +48,10 @@ $(document).ready(function()
 
 	function update()
 	{
-		console.log(playerSpeed);
 		if(loaded)
 		{
 			//alert(mazeWidth);
+			render();
 			updateMovement(player.getDirection());
 		}
 	}
@@ -65,7 +67,7 @@ $(document).ready(function()
 		img = new Image();
 	    img.onload = function() 
 	    { // when the image is loaded, draw the image and the character
-			context.drawImage(img, 0, 0);
+			context.drawImage(img, -canvas.width/2, -canvas.height/2);
 			drawCharacter(playerX, playerY);
 			mazeHeight = this.height;
 			mazeWidth = this.width;
@@ -104,12 +106,16 @@ $(document).ready(function()
 		switch(direction)
 		{
 			case 0: player.moveNorth();
+					offsetY+= player.getSpeed()*2.5;
 					break;
 			case 1: player.moveEast();
+					offsetX-= player.getSpeed()*2.5;
 					break;
 			case 2: player.moveSouth();
+					offsetY-= player.getSpeed()*2.5;
 					break;
 			case 3: player.moveWest();
+					offsetX+= player.getSpeed()*2.5;
 					break;
 		}
 		if(!detectCollision(player.getX(), player.getY(), player.getWidth(), player.getHeight()))
@@ -166,6 +172,8 @@ $(document).ready(function()
 
 	function respawn()
 	{
+		offsetX = 0;
+		offsetY = 0;
 		player.setX(5);
 		player.setY(5);
 		player.setDirection(2);
@@ -247,6 +255,13 @@ $(document).ready(function()
 		context.closePath();
 		context.fillStyle = "white";
 		context.fill();
+	}
+
+	function render()
+	{
+		clearScreen(0, 0, canvas.width, canvas.height)
+		console.log(offsetX + ", " + offsetY)
+		context.drawImage(img, offsetX, offsetY);
 	}
 
 	main();

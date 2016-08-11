@@ -152,8 +152,8 @@ vector<int> SquareMaze::solveMaze()
 
 PNG* SquareMaze::drawMaze() const
 {
-	int picWidth = _width * 20 + 1;
-	int picHeight = _height * 20 + 1;
+	int picWidth = _width * 50 + 1;
+	int picHeight = _height * 50 + 1;
 	PNG * picture = new PNG(picWidth, picHeight);
 	colorMaze(picture);
 
@@ -183,20 +183,20 @@ PNG* SquareMaze::drawMaze() const
 				{
 					if(maze[yy][xx].right)
 					{
-						for(int k = 0; k <= 20; k++)
+						for(int k = 0; k <= 50; k++)
 						{
-							(*picture)((xx+1)*20, yy*20+k)->red = 0;
-							(*picture)((xx+1)*20, yy*20+k)->blue = 0;
-							(*picture)((xx+1)*20, yy*20+k)->green = 153;
+							(*picture)((xx+1)*50, yy*50+k)->red = 0;
+							(*picture)((xx+1)*50, yy*50+k)->blue = 0;
+							(*picture)((xx+1)*50, yy*50+k)->green = 153;
 						}
 					}
 					if(maze[yy][xx].bot)
 					{
-						for(int k = 0; k <= 20; k++)
+						for(int k = 0; k <= 50; k++)
 						{
-							(*picture)(xx*20+k, (yy+1)*20)->red = 0;
-							(*picture)(xx*20+k, (yy+1)*20)->blue = 0;
-							(*picture)(xx*20+k, (yy+1)*20)->green = 153;
+							(*picture)(xx*50+k, (yy+1)*50)->red = 0;
+							(*picture)(xx*50+k, (yy+1)*50)->blue = 0;
+							(*picture)(xx*50+k, (yy+1)*50)->green = 153;
 						}
 					}
 				}
@@ -207,7 +207,7 @@ PNG* SquareMaze::drawMaze() const
 	return picture;
 }
 
-PNG* SquareMaze::drawMazeWithSolution()
+PNG* SquareMaze::drawMazeWithExit()
 {
 	PNG* picture = drawMaze();
 	vector<int> temp = solveMaze();
@@ -227,7 +227,7 @@ PNG* SquareMaze::drawMazeWithSolution()
 
 		solution.pop_back();
 		//cout << dir << endl;
-		for(int i = 0; i < 20; i++)
+		for(int i = 0; i < 50; i++)
 		{
 			if(dir == 0)
 			{
@@ -249,14 +249,20 @@ PNG* SquareMaze::drawMazeWithSolution()
 		}
 	}
 	curX -= 4;
-	curY += 15;
+	curY += 45;
 
-	for(int k = 1; k < 20; k++)
+	for(int k = 1; k < 50; k++)
 	{
-		(*picture)(curX, curY)->red = 204;
-		(*picture)(curX, curY)->green = 102;
-		(*picture)(curX, curY)->blue = 0;
-		curX++;
+		int tempX = curX;
+		for(int l = 1; l < 50; l++)
+		{
+			(*picture)(curX, curY)->red = 255;
+			(*picture)(curX, curY)->green = 255;
+			(*picture)(curX, curY)->blue = 0;
+			curX++;
+		}
+		curX = tempX;
+		curY--;
 	}
 
 	return picture;

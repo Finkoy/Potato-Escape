@@ -297,7 +297,7 @@ $(document).ready(function()
 		levelCount++;
 		spawnRate++;
 		$("#level_count").text("Level: " + levelCount);
-		context.font = "2vw Arial";
+		context.font = "1.75vw Arial";
 		context.fillStyle = "black";
 		context.textAlign = "center";
 		context.textBaseline = "middle";

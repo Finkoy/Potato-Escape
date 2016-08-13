@@ -7,6 +7,7 @@ function Player(direction, x, y, width, height, speed)
 	this.height = height;
 	this.direction = direction;
 	this.speed = speed;
+	this.bullets = [];
 
 	this.moveNorth = function()
 	{
@@ -115,5 +116,55 @@ function Player(direction, x, y, width, height, speed)
 	this.setSpeed = function(speed)
 	{
 		this.speed = speed;
+	}
+
+	this.shoot = function()
+	{
+		var startX;
+		var startY;
+		var projSpeed = 2;
+		var radius = 2;
+		var maxDist = 1000;
+		switch(this.direction)
+		{
+			case 0: 
+				startX = this.charPosX + this.width/2;
+				startY = this.charPosY - this.height;
+				break;
+			case 1:
+				startX = this.charPosX + 2 * this.width;
+				startY = this.charPosY + this.height/2;
+				break;
+			case 2:
+				startX = this.charPosX + this.width/2;
+				startY = this.charPosY + 2 * this.height;
+				break;
+			case 3:
+				startX = this.charPosX - this.width;
+				startY = this.charPosY + this.height/2;
+				break;
+			default: break;
+		}
+		var proj = new Projectile(startX, startY, this.direction, projSpeed, radius, maxDist);
+		this.bullets.push(proj);
+	}
+
+	this.getBullets = function()
+	{
+		return this.bullets;
+	}
+
+	this.checkBullets = function()
+	{
+		if(this.bullets.length === 0) return;
+		if(!this.bullets[0].isAlive())
+		{
+			this.bullets.shift();
+		}
+	}
+
+	this.despawnBullets = function()
+	{
+		this.bullets = [];
 	}
 }

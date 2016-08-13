@@ -29,7 +29,7 @@
 				Avoid enemies and enemy projectiles
 			</ul>
 			<ul>
-				Use WASD or arrow keys to move. You can also shift the screen by holding the keys.
+				Use WASD or arrow keys to move and space to shoot. You can also shift the screen by holding the keys.
 			</ul>
 			<ul>
 				Press 'R' to respawn
@@ -43,6 +43,7 @@
 		<script src = "Queue.js" type = "text/javascript"></script>
 		<script src = "player.js" type = "text/javascript"></script>
 		<script src = "enemy.js" type = "text/javascript"></script>
+		<script src = "projectile.js" type = "text/javascript"></script>
 		<script src = "game.js" type= "text/javascript"></script>
 	</body>
 </html>

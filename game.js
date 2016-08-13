@@ -30,6 +30,9 @@ $(document).ready(function()
 	var enemyQueue;
 	var spawnUnits = [];
 
+	//bullets
+	var bullets = [];
+
 	//Game state variables
 	var levelCount = 1;
 	var deathCount = 0;
@@ -50,10 +53,7 @@ $(document).ready(function()
 		window.addEventListener("keydown", moveCharacter, true);
 
 		//Adds enemy ID tags into queue
-		for(var i = 0; i < maxEnemy; i++)
-		{
-			enemyQueue.enqueue(i);
-		} 
+		resetQueue();
 	}
 
 	function loop()
@@ -73,6 +73,8 @@ $(document).ready(function()
 			render();
 			determineSpawn();
 			updateEnemyMovement();
+			updatePlayerBullets();
+			player.checkBullets();
 			updatePlayerMovement(player.getDirection());
 			playerStepCount++;
 		}
@@ -107,6 +109,18 @@ $(document).ready(function()
 		context.fillRect(x,y, unit.getWidth(), unit.getHeight());
 		context.beginPath();
 		context.rect(x,y,100,100);
+		context.closePath();
+	}
+
+	function drawBullet(x, y, color, bullet)
+	{
+		restoreBackground(x, y);
+		bullet.setX(x);
+		bullet.setY(y);
+		context.beginPath();
+		context.arc(x, y, bullet.getRadius(), 0, 2 * Math.PI, false);
+		context.fillStyle = "black";
+		context.fill();
 		context.closePath();
 	}
 
@@ -179,7 +193,11 @@ $(document).ready(function()
 		        player.moveEast();
 		        offsetX+= player.getSpeed() * 3;
 		        break;
-		    case 82: respawn();
+		    case 32: 
+		    	player.shoot();
+		    	break;
+		    case 82: 
+		    	respawn();
 		    	break;
 		    default: return;
 		}
@@ -199,13 +217,16 @@ $(document).ready(function()
 
 	function respawn()
 	{
+		clearAllUnits();
+		player.despawnBullets();
 		offsetX = 0;
 		offsetY = 0;
 		player.setX(5);
 		player.setY(5);
 		player.setDirection(2);
 		deathCount++;
-		clearAllUnits();
+		resetQueue();
+
 		if(playerSpeed > 0.6)
 		{
 			playerSpeed-= 0.5;
@@ -220,27 +241,42 @@ $(document).ready(function()
 		var imgData = context.getImageData(nextX, nextY, width, height);
 		var data = imgData.data;
 		var finish = false;
-		var unitX = unit.getX();
-		var unitY = unit.getY();
-		if(unitX <= 0 || unitX + unit.getWidth() >= canvas.width
-			|| unitY <= 0 || unitY + unit.getHeight() >= canvas.height)
+		if(nextX <= 0 || nextX + width >= canvas.width
+			|| nextY <= 0 || nextY + height >= canvas.height)
 		{
 			return true;
 		}
 
 		for(var i = 0; i < 4 * width * height; i +=4)
 		{
-			if(data[i] >= 200 && data[i + 1] <= 106 && data[i + 2] === 0)
+			if(data[i] >= 175 && data[i + 1] <= 106 && data[i + 2] < 40)
 			{	
 			}
-			else if(unit === player && (data[i] > 210 && data[i + 1] > 210 && data[i + 2] === 0))
+			else if(unit === player && (data[i] > 200 && data[i + 1] > 200 && data[i + 2] === 0))
 			{
 				finish = true;
 				break;
 			}
 			else
 			{
-				//console.log(data[i] + ", " + data[i + 1] + ", " + data[i+ 2]);
+				if(unit instanceof Enemy && data[i] === 0 && data[i + 1] === 0 && data[i + 2] === 0)
+				{
+					deleteUnit(unit.getID());
+				}
+				else if(unit instanceof Projectile && !(data[i] === 0 && data[i + 1] === 153 && data[i + 2] === 0)
+					&& (data[i] > 40 && data[i + 1] > 40 && data[i + 2] > 40) ||
+						(unit instanceof Projectile && data[i] < 80 && data[i + 1] < 80 && data[i + 2] > 150))
+				{
+					findByID(closestEnemyToBullet(unit.getX(), unit.getY()));
+					unit.hitUnit(true);
+					return true;
+				}
+
+				if(unit instanceof Projectile)
+				{
+
+					console.log(data[i] + ", " + data[i + 1] + ", " + data[i + 2]);
+				}
 				return true;
 			}
 		}
@@ -255,9 +291,10 @@ $(document).ready(function()
 
 	function victoryScreen()
 	{
-		firstRound = false;
+		player.despawnBullets();
 		clearScreen(0, 0, canvas.width, canvas.height);
 		levelCount++;
+		spawnRate++;
 		$("#level_count").text("Level: " + levelCount);
 		context.font = "2vw Arial";
 		context.fillStyle = "black";
@@ -332,18 +369,18 @@ $(document).ready(function()
 	{
 		spawnUnits[index] = null;
 		enemyQueue.enqueue(index);
+		enemyCount--;
 	}
 
 	function clearAllUnits()
 	{
-		for(var i = 0; i < spawnUnits.length; i++)
-		{
-			deleteUnit(i);
-		}
+		spawnUnits = [];
+		enemyCount = 0;
 	}
 
 	function updateEnemyMovement()
 	{
+		spawnUnits.clean(null);
 		for(var i = 0; i < spawnUnits.length; i++)
 		{
 			var enemy = spawnUnits[i];
@@ -357,6 +394,75 @@ $(document).ready(function()
 		}
 	}
 
+	function updatePlayerBullets()
+	{
+		var bullets = player.getBullets();
+		for(var i = 0; i < bullets.length; i++)
+		{
+			bullets[i].move();
+			bullets[i].updateTraveled();
+			if(detectCollision(bullets[i].getX(), bullets[i].getY(), bullets[i].getRadius(), bullets[i].getRadius(), bullets[i]))
+			{
+				bullets[i].ricochet();
+			}
+			if(bullets[i].isAlive())
+			{
+				drawBullet(bullets[i].getX(), bullets[i].getY(), "black", bullets[i]);
+			}
+		}
+	}
+
+	function closestEnemyToBullet(x, y)
+	{
+		var closestID = -1;
+		var smallestDist = 0x7FFFFFFF;
+		spawnUnits.clean(null);
+		for(var i = 0; i < spawnUnits.length; i++)
+		{
+			var curDist = Math.sqrt(Math.pow(x - spawnUnits[i].getX(), 2) + Math.pow(y - spawnUnits[i].getY(), 2));
+			if(curDist < smallestDist)
+			{
+				smallestDist = curDist;
+				closestID = spawnUnits[i].getID();
+			}
+		}
+		return closestID;
+	}
+
+	function findByID(ID)
+	{
+		for(var i = 0; i < spawnUnits.length; i++)
+		{
+			if(spawnUnits[i] != null && spawnUnits[i].getID() === ID)
+			{
+				spawnUnits[i] = null;
+				enemyQueue.enqueue(i);
+				enemyCount--;
+			}
+		}
+	}
+
+	function resetQueue()
+	{
+		enemyQueue = new Queue();
+		for(var i = 0; i < maxEnemy; i++)
+		{
+			enemyQueue.enqueue(i);
+		} 
+	}
+
+	Array.prototype.clean = function(deleteValue) 
+	{
+  		for (var i = 0; i < this.length; i++) 
+  		{
+    		if (this[i] == deleteValue) 
+    		{         
+    	  		this.splice(i, 1);
+      			i--;
+    		}
+  		}
+  		return this;
+	};
 
 	main();
 })

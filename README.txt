@@ -20,4 +20,5 @@ List of Known Bugs:
 5. Enemies can spawn outside of map boundaries.
 6. Player sometimes automatically dies upon reaching finishing maze.
 
-	
+Link to game:
+http://htmlpreview.github.io/?https://raw.githubusercontent.com/Finkoy/potato-escape/master/index.php

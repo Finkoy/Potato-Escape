@@ -89,6 +89,7 @@ $(document).ready(function()
 		canvas = $("#mazecanvas")[0];
 		context = canvas.getContext("2d");
 		img = new Image();
+		img.crossOrigin = "Anonymous";
 	    img.onload = function() 
 	    { // when the image is loaded, draw the image and the character
 			context.drawImage(img, 0, 0);
